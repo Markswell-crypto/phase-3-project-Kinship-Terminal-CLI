@@ -5,9 +5,14 @@ from modules import *
 
 class Cli:
     def __init__(self):
-        self.session = Session(create_engine("sqlite:///lib/family.db"))
+        self.engine = create_engine("sqlite:///lib/family.db")
+        self.session = Session(self.engine)
+        self.create_database()        
         self.welcome()
         self.login_and_get_user_id()
+        
+    def create_database(self):
+        Base.metadata.create_all(self.engine)
 
     def welcome(self):
         print("""
@@ -169,7 +174,7 @@ class Cli:
         
         print('1. Parent')
         print('2. Spouses')
-        print('2. Child')
+        print('3. Child')
         
         
         relationship_type = input("Enter either one of those options: ")
@@ -221,7 +226,8 @@ class Cli:
 
 
     def update_status(self, user_choice):
-                pass
+        print("Update option is not implemented yet.")
+
             
             
             
@@ -257,13 +263,24 @@ class Cli:
 
             if not person_to_delete:
         # Handle the case where the person does not exist
-                 "Person not found in the database."
-
+                print("Person not found in the database.")
+                        
             else:
         # Delete the person from the database
                 self.session.delete(person_to_delete)
+                connections_to_delete = connections.delete().where(
+                (connections.c.individual1_id == person_to_delete.id) |
+                (connections.c.individual2_id == person_to_delete.id)
+                )
+                self.session.execute(connections_to_delete)
                 self.session.commit()
                 print(f"Successfully deleted person {person_to_delete.first_name} {person_to_delete.last_name}.")
+
+                go_back = input("Press any key to go back to the main menu or 'Q' to quit: ")
+                if go_back.lower() == 'q':
+                    exit()
+                else:
+                    self.starter(user_id)            
         #     except Exception as e:
         # # Handle any exceptions that may occur during the deletion
         #         self.session.rollback()
@@ -290,7 +307,8 @@ class Cli:
     
     
     def generate_tree(self, user_choice, user_id):
-        pass    
+        print("Generating family tree is not implemented yet.")
+    
         
 
 if __name__ == '__main__':
