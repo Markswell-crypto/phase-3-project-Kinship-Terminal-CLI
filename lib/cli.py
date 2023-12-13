@@ -11,7 +11,7 @@ class Cli:
 
     def welcome(self):
         print("""
-~~ Welcome to Family Tree!!~~""")
+~~ Welcome to Kinship Terminal!!~~""")
 
     def login_and_get_user_id(self):
         while True:
