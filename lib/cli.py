@@ -16,7 +16,7 @@ class Cli:
 
     def welcome(self):
         print("""
-~~ Welcome to Kinship Terminal!!~~""")
+~~~ Welcome to Kinship Terminal!!~~~""")
 
     def login_and_get_user_id(self):
         while True:
@@ -25,8 +25,8 @@ class Cli:
             print(' ')
             print('Select from the two options below:')
             print(' ')
-            print('Visitor: 1')
-            print('User: 2')
+            print('1. Visitor')
+            print('2. User')
             print(' ')
             
 
@@ -140,9 +140,9 @@ class Cli:
         # Add the new person to the database
             self.session.add(new_person)
             self.session.commit()
-
+            print(' ')
             print(f"{new_person.first_name} {new_person.last_name} has been added!")
-
+            print(' ')
   
                 
         
@@ -154,28 +154,36 @@ class Cli:
 
         family_members = self.session.query(Person).filter(Person.user_id == user_id).all()
         if not family_members:
+            print(' ')
             print("You need to add family members first.")
+            print(' ')
             return
 
         print("Select the individuals to connect:")
+        print(' ')
         for member in family_members:
+            print(' ')
             print(f"{member.id}: {member.first_name} {member.last_name}")
-
+            print(' ')
+            
         person1_id = input("Enter the ID of the first person: ")
+        print(' ')
         person2_id = input("Enter the ID of the second person: ")
 
         person1 = self.session.query(Person).filter(Person.id == person1_id, Person.user_id == user_id).first()
+        print(' ')
         person2 = self.session.query(Person).filter(Person.id == person2_id, Person.user_id == user_id).first()
 
         if not person1 or not person2:
             print("Invalid person IDs. Please select valid family members.")
         
-        print('What relationship out these 3 options do of them share?')
+        print(' ')
+        print('What relationship out of these 3 options do they share?')
         
         print('1. Parent')
         print('2. Spouses')
-        print('3. Child')
-        
+        print('3. Sibling')
+        print(' ')
         
         relationship_type = input("Enter either one of those options: ")
         
@@ -186,55 +194,102 @@ class Cli:
             relationship_id= relationship_type,
             users_id= user_id
         )
-            self.session.add(new_connection)
+            self.session.execute(new_connection)
             self.session.commit()
-            self.session.add(new_connection2)
-            self.session.commit()
-            print(f"Connection created between {person1.first_name} and {person2.first_name}: {relationship_type}") 
-        elif relationship_type == '3':
-               
-            new_connection2 = connections.insert().values(
-            individual1_id=person1.id,
-            individual2_id=person2.id,
-            relationship_id= relationship_type,
-            users_id= user_id
-        )
-
-            self.session.add(new_connection)
-            self.session.commit()
-            self.session.add(new_connection2)
-            self.session.commit()
+            
+            print(' ')
             print(f"Connection created between {person1.first_name} and {person2.first_name}: {relationship_type}") 
         elif relationship_type == '2':
+               
             new_connection = connections.insert().values(
             individual1_id=person1.id,
             individual2_id=person2.id,
             relationship_id= relationship_type,
             users_id= user_id
         )
-            self.session.add(new_connection)
+
+            self.session.execute(new_connection)
+            self.session.commit()
+            print(' ')
+            print(f"Connection created between {person1.first_name} and {person2.first_name}: {relationship_type}") 
+        elif relationship_type == '3':
+            new_connection = connections.insert().values(
+            individual1_id=person1.id,
+            individual2_id=person2.id,
+            relationship_id= relationship_type,
+            users_id= user_id
+        )
+            self.session.execute(new_connection)
             self.session.commit()
             
-            
+            print(' ')
             print(f"Connection created between {person1.first_name} and {person2.first_name}: {relationship_type}")
         else:
             print('Not supported, only pick the listed options.')
-        pass
-
-       
 
 
+    def update_status(self, user_choice, user_id):
+        print(' ')
+        print("Update Family Member Information")
+        print(' ')
+        # Display the list of family members
+        family_members = self.session.query(Person).filter(Person.user_id == user_id).all()
 
-    def update_status(self, user_choice):
-        print("Update option is not implemented yet.")
+        if not family_members:
+            print(' ')
+            print("No family members found.")
+            print(' ')
+            return
 
-            
-            
-            
+        print(' ')
+        print("Select the individual to update:")
+        print(' ')
+        for member in family_members:
+            print(' ')
+            print(f"{member.id}: {member.first_name} {member.last_name} > {member.user_relashionship}")
+            print(' ')
+        person_id = input("Enter the ID of the person you want to update: ")
+
+        person_to_update = self.session.query(Person).filter(
+            Person.id == person_id,
+            Person.user_id == user_id
+        ).first()
+
+        if not person_to_update:
+            print(' ')
+            print("Person not found in the database.")
+            print(' ')
+        else:
+            print(f"Selected person: {person_to_update.first_name} {person_to_update.last_name}")
+            print(' ')
+            print("What would you like to update?")
+            print("1. First Name")
+            print("2. Last Name")
+            print("3. Status")
+            print(' ')
+            update_option = input("Enter the option number: ")
+
+            if update_option == "1":
+                new_first_name = input("Enter the new first name: ")
+                person_to_update.first_name = new_first_name
+            elif update_option == "2":
+                new_last_name = input("Enter the new last name: ")
+                person_to_update.last_name = new_last_name
+            elif update_option == "3":
+                new_status = input("Enter the new status: ")
+                person_to_update.user_relashionship = new_status
+            else:
+                print("Invalid option. No updates performed.")
+
+            self.session.commit()
+            print(' ')
+            print(f"Information updated for {person_to_update.first_name} {person_to_update.last_name}.")
+    
+    
     def delete_individual(self, user_choice, user_id):
         while user_choice:
-            
-            print('Delete a Person')
+            print(' ')
+            print('Delete Family Member')
         
             query = self.session.query(Person).filter(Person.user_id == user_id).all()
 
@@ -263,28 +318,31 @@ class Cli:
 
             if not person_to_delete:
         # Handle the case where the person does not exist
+                print(' ')
                 print("Person not found in the database.")
                         
             else:
         # Delete the person from the database
-                self.session.delete(person_to_delete)
-                connections_to_delete = connections.delete().where(
-                (connections.c.individual1_id == person_to_delete.id) |
-                (connections.c.individual2_id == person_to_delete.id)
-                )
-                self.session.execute(connections_to_delete)
-                self.session.commit()
-                print(f"Successfully deleted person {person_to_delete.first_name} {person_to_delete.last_name}.")
-
+                try:
+                    self.session.delete(person_to_delete)
+                    connections_to_delete = connections.delete().where(
+                    (connections.c.individual1_id == person_to_delete.id) |
+                    (connections.c.individual2_id == person_to_delete.id)
+                    )
+                    self.session.execute(connections_to_delete)
+                    self.session.commit()
+                    print(' ')
+                    print(f"Successfully deleted person {person_to_delete.first_name} {person_to_delete.last_name}.")
+                    print(' ')
+                except Exception as e:
+                    self.session.rollback()
+                    print(f"Error deleting person: {str(e)}")
+                    print(' ')
                 go_back = input("Press any key to go back to the main menu or 'Q' to quit: ")
                 if go_back.lower() == 'q':
                     exit()
                 else:
-                    self.starter(user_id)            
-        #     except Exception as e:
-        # # Handle any exceptions that may occur during the deletion
-        #         self.session.rollback()
-        #         return f"Error deleting person: {str(e)}"
+                    self.starter(user_id)
 
     def create_user(self):
         print(" ")
